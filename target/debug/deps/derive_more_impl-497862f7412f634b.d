@@ -1,0 +1,9 @@
+/home/lucas-laviolette/7005Projects/final-project/target/debug/deps/derive_more_impl-497862f7412f634b.d: /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/lib.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/utils.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/is_variant.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/../README.md /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/../doc/is_variant.md
+
+/home/lucas-laviolette/7005Projects/final-project/target/debug/deps/libderive_more_impl-497862f7412f634b.so: /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/lib.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/utils.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/is_variant.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/../README.md /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/../doc/is_variant.md
+
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/lib.rs:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/utils.rs:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/is_variant.rs:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/../README.md:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-impl-2.0.1/src/../doc/is_variant.md:

@@ -1,0 +1,10 @@
+/home/lucas-laviolette/7005Projects/final-project/target/debug/deps/humantime-a0c8c1ce13bc4289.d: /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/lib.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/date.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/duration.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/wrapper.rs
+
+/home/lucas-laviolette/7005Projects/final-project/target/debug/deps/libhumantime-a0c8c1ce13bc4289.rlib: /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/lib.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/date.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/duration.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/wrapper.rs
+
+/home/lucas-laviolette/7005Projects/final-project/target/debug/deps/libhumantime-a0c8c1ce13bc4289.rmeta: /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/lib.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/date.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/duration.rs /home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/wrapper.rs
+
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/lib.rs:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/date.rs:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/duration.rs:
+/home/lucas-laviolette/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/humantime-2.3.0/src/wrapper.rs:

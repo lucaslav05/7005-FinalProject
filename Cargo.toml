@@ -1,0 +1,20 @@
+[package]
+name = "final-project"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+rand = "0.9.2"
+tokio = { version = "1.41", features = ["full"] }
+tokio-netem = "0.1.1"
+ratatui = "0.29.0"
+crossterm = "0.29.0"
+color-eyre = "0.6.5"
+clap = { version = "4.5.52", features = ["derive"] }
+bytes = "1.4"
+tokio-stream = "0.1"
+bincode = "1.3"
+
+
