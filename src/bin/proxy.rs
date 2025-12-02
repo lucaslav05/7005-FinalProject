@@ -97,12 +97,14 @@ struct Args {
     log_port: u16,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Message {
     msg: String,
     seq: u64,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Ack {
     received: u64,
