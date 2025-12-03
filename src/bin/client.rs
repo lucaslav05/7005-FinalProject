@@ -136,7 +136,7 @@ async fn main() -> tokio::io::Result<()> {
 
         // ---- Wait for ACK ----
         let mut buf = [0u8; 256];
-        let tries = 0;
+        let mut tries = 0;
 
         loop {
             if tries >= args.max_retries {
@@ -182,6 +182,7 @@ async fn main() -> tokio::io::Result<()> {
                         .await
                         .ok();
                     println!("Timeout, resend seq {}", seq);
+                    tries += 1;
                 }
             }
         }

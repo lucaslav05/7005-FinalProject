@@ -168,47 +168,35 @@ async fn main() -> tokio::io::Result<()> {
 
             loop {
                 if let Ok((n, addr)) = sock.recv_from(&mut buf).await {
-                    let mut lock = last_client.lock().await;
-                    if Some(addr) != *lock {
-                        // new client, remember it
-                        *lock = Some(addr);
-                    }
+                    let mut last_client_lock = last_client.lock().await;
 
-                    if Some(addr) == *lock {
-                        // --- from client to server ---
+                    if addr == server_addr {
+                        // Server → Client
+                        if let Some(client_addr) = *last_client_lock {
+                            if rng.random::<f64>() < args.server_drop {
+                                continue;
+                            }
+                            if rng.random::<f64>() < args.server_delay {
+                                let delay = rng.random_range(
+                                    args.server_delay_time_min..=args.server_delay_time_max,
+                                );
+                                sleep(Duration::from_millis(delay)).await;
+                            }
+                            let _ = sock.send_to(&buf[..n], client_addr).await;
+                        }
+                    } else {
+                        // Client → Server
+                        *last_client_lock = Some(addr);
                         if rng.random::<f64>() < args.client_drop {
-                            // dropped
                             continue;
                         }
                         if rng.random::<f64>() < args.client_delay {
-                            let min = args.client_delay_time_min;
-                            let max = args.client_delay_time_max.max(min);
-                            let delay = if min == max {
-                                min
-                            } else {
-                                rng.random_range(min..=max)
-                            };
+                            let delay = rng.random_range(
+                                args.client_delay_time_min..=args.client_delay_time_max,
+                            );
                             sleep(Duration::from_millis(delay)).await;
                         }
                         let _ = sock.send_to(&buf[..n], server_addr).await;
-                    } else {
-                        // --- from server to client ---
-                        if rng.random::<f64>() < args.server_drop {
-                            continue;
-                        }
-                        if rng.random::<f64>() < args.server_delay {
-                            let min = args.server_delay_time_min;
-                            let max = args.server_delay_time_max.max(min);
-                            let delay = if min == max {
-                                min
-                            } else {
-                                rng.random_range(min..=max)
-                            };
-                            sleep(Duration::from_millis(delay)).await;
-                        }
-                        if let Some(client_addr) = *lock {
-                            let _ = sock.send_to(&buf[..n], client_addr).await;
-                        }
                     }
                 }
             }
