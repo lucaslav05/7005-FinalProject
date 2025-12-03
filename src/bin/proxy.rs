@@ -19,6 +19,8 @@ use ratatui::{
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{io::stdout, sync::Arc, time::Duration};
+use tokio::fs::OpenOptions;
+use tokio::io::AsyncWriteExt;
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
     net::{TcpListener, TcpStream, UdpSocket},
@@ -135,18 +137,56 @@ fn timestamp() -> f64 {
         .as_secs_f64()
 }
 
+#[derive(Clone)]
+struct LogFile(Arc<Mutex<tokio::fs::File>>);
+
+impl LogFile {
+    async fn new(path: &str) -> Self {
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .await
+            .expect("failed to open log file");
+        LogFile(Arc::new(Mutex::new(file)))
+    }
+
+    async fn write_event(&self, ev: &LogEvent) {
+        let line = serde_json::to_string(ev).unwrap();
+        let mut f = self.0.lock().await;
+        let _ = f.write_all(line.as_bytes()).await;
+        let _ = f.write_all(b"\n").await;
+    }
+}
+
+async fn log_proxy(log_file: &LogFile, event: &str, seq: Option<u64>, component: &str) {
+    let ev = LogEvent {
+        ts: timestamp(),
+        component: component.to_string(),
+        event: event.to_string(),
+        seq,
+    };
+    log_file.write_event(&ev).await;
+}
+
 #[tokio::main]
 async fn main() -> tokio::io::Result<()> {
     let args = Args::parse();
+
+    let log_file = LogFile::new("proxy.log").await;
+
     let metrics = Arc::new(Mutex::new(Metrics::default()));
 
     let log_listener = TcpListener::bind(("0.0.0.0", args.log_port)).await?;
     let metrics_clone = metrics.clone();
+
+    let lf = log_file.clone();
     tokio::spawn(async move {
         loop {
             if let Ok((stream, _addr)) = log_listener.accept().await {
                 let metrics_clone2 = metrics_clone.clone();
-                tokio::spawn(handle_log(stream, metrics_clone2));
+                let lf2 = lf.clone();
+                tokio::spawn(handle_log(stream, metrics_clone2, lf2));
             }
         }
     });
@@ -167,6 +207,8 @@ async fn main() -> tokio::io::Result<()> {
         let args = Arc::new(args.clone());
         let mut rng = StdRng::seed_from_u64(42);
 
+        let log_file = log_file.clone();
+
         tokio::spawn(async move {
             let mut buf = vec![0u8; 2048];
 
@@ -176,11 +218,14 @@ async fn main() -> tokio::io::Result<()> {
                     Err(_) => continue,
                 };
 
+                log_proxy(&log_file, "recv", None, "proxy_client").await;
+
                 // Remember the client
                 *last_client.lock().await = Some(client_addr);
 
                 // Drop packet?
                 if rng.random::<f64>() < args.client_drop {
+                    log_proxy(&log_file, "drop", None, "proxy_client").await;
                     continue;
                 }
 
@@ -193,10 +238,12 @@ async fn main() -> tokio::io::Result<()> {
                     } else {
                         rng.random_range(min..=max)
                     };
+                    log_proxy(&log_file, "delay", None, "proxy_client").await;
                     sleep(Duration::from_millis(delay)).await;
                 }
 
                 // Forward exactly n bytes to server
+                log_proxy(&log_file, "forward", None, "proxy_client").await;
                 let _ = server_sock.send_to(&buf[..n], server_addr).await;
             }
         });
@@ -209,6 +256,8 @@ async fn main() -> tokio::io::Result<()> {
         let args = Arc::new(args.clone());
         let mut rng = StdRng::seed_from_u64(43);
 
+        let log_file = log_file.clone();
+
         tokio::spawn(async move {
             let mut buf = vec![0u8; 2048];
 
@@ -218,12 +267,15 @@ async fn main() -> tokio::io::Result<()> {
                     Err(_) => continue,
                 };
 
+                log_proxy(&log_file, "recv", None, "proxy_server").await;
+
                 if src_addr != server_addr {
                     continue;
                 }
 
                 // Drop packet?
                 if rng.random::<f64>() < args.server_drop {
+                    log_proxy(&log_file, "drop", None, "proxy_server").await;
                     continue;
                 }
 
@@ -236,11 +288,13 @@ async fn main() -> tokio::io::Result<()> {
                     } else {
                         rng.random_range(min..=max)
                     };
+                    log_proxy(&log_file, "delay", None, "proxy_server").await;
                     sleep(Duration::from_millis(delay)).await;
                 }
 
                 // Forward exactly n bytes to last client
                 if let Some(client_addr) = *last_client.lock().await {
+                    log_proxy(&log_file, "forward", None, "proxy_server").await;
                     let _ = client_sock.send_to(&buf[..n], client_addr).await;
                 }
             }
@@ -283,12 +337,14 @@ async fn main() -> tokio::io::Result<()> {
     Ok(())
 }
 
-async fn handle_log(stream: TcpStream, metrics: Arc<Mutex<Metrics>>) {
+async fn handle_log(stream: TcpStream, metrics: Arc<Mutex<Metrics>>, log_file: LogFile) {
     let reader = BufReader::new(stream);
     let mut lines = reader.lines();
 
     while let Ok(Some(line)) = lines.next_line().await {
         if let Ok(log) = serde_json::from_str::<LogEvent>(&line) {
+            log_file.write_event(&log).await;
+
             let mut m = metrics.lock().await;
             match (log.component.as_str(), log.event.as_str()) {
                 ("client", "send") => m.packets_sent += 1,
