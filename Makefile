@@ -29,6 +29,7 @@ server:
 								--log-port $(logPORT)
 
 proxy:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -44,6 +45,7 @@ proxy:
 								--log-port $(logPORT)
 
 proxy-50-delay-client:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -59,6 +61,7 @@ proxy-50-delay-client:
 								--log-port $(logPORT)
 
 proxy-50-delay-server:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -74,6 +77,7 @@ proxy-50-delay-server:
 								--log-port $(logPORT)
 
 proxy-100-delay-server:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -89,6 +93,7 @@ proxy-100-delay-server:
 								--log-port $(logPORT)
 
 proxy-100-delay-client:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -104,6 +109,7 @@ proxy-100-delay-client:
 								--log-port $(logPORT)
 
 proxy-50-drop-client:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -119,6 +125,7 @@ proxy-50-drop-client:
 								--log-port $(logPORT)
 
 proxy-50-drop-server:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -134,6 +141,7 @@ proxy-50-drop-server:
 								--log-port $(logPORT)
 
 proxy-100-drop-server:
+				rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -149,6 +157,7 @@ proxy-100-drop-server:
 								--log-port $(logPORT)
 
 proxy-100-drop-client:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -164,6 +173,7 @@ proxy-100-drop-client:
 								--log-port $(logPORT)
 
 proxy-50-drop-both:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -179,6 +189,7 @@ proxy-50-drop-both:
 								--log-port $(logPORT)
 
 proxy-50-delay-both:
+			rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -194,6 +205,7 @@ proxy-50-delay-both:
 								--log-port $(logPORT)
 
 proxy-50-delay-drop-both:
+				rm -rf ./proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -209,6 +221,7 @@ proxy-50-delay-drop-both:
 								--log-port $(logPORT)
 
 proxy-100-delay-drop-both:
+				rm -rf .proxy.log
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
