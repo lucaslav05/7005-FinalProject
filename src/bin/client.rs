@@ -72,6 +72,12 @@ struct Args {
 
     #[arg(long)]
     max_retries: u32,
+
+    #[arg(long)]
+    log_host: String,
+
+    #[arg(long)]
+    log_port: u16,
 }
 
 /**
@@ -84,7 +90,7 @@ async fn main() -> tokio::io::Result<()> {
     let server_addr = format!("{}:{}", args.target_ip, args.target_port); // <-- change
     let bind_addr = "0.0.0.0:0"; // client UDP port
 
-    let log_addr = format!("{}:{}", args.target_ip, "9100"); // UI log stream (client channel)
+    let log_addr = format!("{}:{}", args.log_host, args.log_port); // UI log stream (client channel)
 
     let udp = UdpSocket::bind(bind_addr).await?;
     udp.connect(server_addr).await?;
