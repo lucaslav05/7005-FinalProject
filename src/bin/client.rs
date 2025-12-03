@@ -176,7 +176,7 @@ async fn main() -> tokio::io::Result<()> {
                         .send(LogEvent {
                             ts: timestamp(),
                             component: "client",
-                            event: "resend",
+                            event: "send",
                             seq,
                         })
                         .await

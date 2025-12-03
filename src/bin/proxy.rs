@@ -11,6 +11,7 @@ use ratatui::{
     Frame, Terminal,
     backend::CrosstermBackend,
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
+    prelude::Stylize,
     style::{Color, Style},
     text::Line,
     widgets::{Bar, BarChart, BarGroup, Block},
@@ -143,8 +144,7 @@ async fn main() -> tokio::io::Result<()> {
     let metrics_clone = metrics.clone();
     tokio::spawn(async move {
         loop {
-            if let Ok((stream, addr)) = log_listener.accept().await {
-                println!("Log connection from {}", addr);
+            if let Ok((stream, _addr)) = log_listener.accept().await {
                 let metrics_clone2 = metrics_clone.clone();
                 tokio::spawn(handle_log(stream, metrics_clone2));
             }
@@ -178,8 +178,6 @@ async fn main() -> tokio::io::Result<()> {
 
                 // Remember the client
                 *last_client.lock().await = Some(client_addr);
-
-                println!("random num: {}", rng.random::<f64>());
 
                 // Drop packet?
                 if rng.random::<f64>() < args.client_drop {
@@ -243,7 +241,7 @@ async fn main() -> tokio::io::Result<()> {
 
                 // Forward exactly n bytes to last client
                 if let Some(client_addr) = *last_client.lock().await {
-                    let _ = server_sock.send_to(&buf[..n], client_addr).await;
+                    let _ = client_sock.send_to(&buf[..n], client_addr).await;
                 }
             }
         });
@@ -305,33 +303,47 @@ async fn handle_log(stream: TcpStream, metrics: Arc<Mutex<Metrics>>) {
 
 fn draw_tui(f: &mut Frame<'_>, m: &Metrics) {
     let values = [
-        ("Sent", m.packets_sent.min(u64::from(u8::MAX)) as u8),
-        ("Recv", m.packets_received.min(u64::from(u8::MAX)) as u8),
-        ("ACK Sent", m.ack_sent.min(u64::from(u8::MAX)) as u8),
-        ("ACK Recv", m.ack_received.min(u64::from(u8::MAX)) as u8),
+        ("Sent", m.packets_sent),
+        ("Recv", m.packets_received),
+        ("ACK Sent", m.ack_sent),
+        ("ACK Recv", m.ack_received),
     ];
+
+    let max_val = values.iter().map(|(_, v)| *v).max().unwrap_or(1);
+    let chart_max = max_val.saturating_add(20);
 
     let bars: Vec<Bar> = values
         .iter()
         .map(|(label, val)| {
+            let style = Style::default().fg(Color::Magenta);
             Bar::default()
-                .value(*val as u64)
+                .value(*val)
                 .label(Line::from(*label))
                 .text_value(format!("{val}"))
-                .style(Style::default().fg(Color::Cyan))
-                .value_style(Style::default().fg(Color::Black).bg(Color::Cyan))
+                .style(style)
+                .value_style(style.reversed())
         })
         .collect();
 
+    use ratatui::layout::{Constraint, Direction, Layout};
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(1)
+        .constraints([Constraint::Length(3), Constraint::Min(5)].as_ref())
+        .split(f.area());
+
+    let title = Block::new()
+        .title("UDP Proxy Metrics".bold())
+        .borders(ratatui::widgets::Borders::ALL);
+    f.render_widget(title, chunks[0]);
+
     let barchart = BarChart::default()
         .data(BarGroup::default().bars(&bars))
-        .block(
-            Block::new()
-                .title("UDP Proxy Metrics")
-                .borders(ratatui::widgets::Borders::ALL),
-        )
-        .bar_width(5)
-        .bar_gap(3);
+        .block(Block::new())
+        .bar_width(3)
+        .bar_gap(1)
+        .max(chart_max)
+        .direction(Direction::Horizontal);
 
-    f.render_widget(barchart, f.area());
+    f.render_widget(barchart, chunks[1]);
 }
