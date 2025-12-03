@@ -57,43 +57,43 @@ use tokio::{
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about=None)]
 struct Args {
-    #[arg(short, long)]
+    #[arg(long)]
     listen_ip: String,
 
-    #[arg(short, long)]
+    #[arg(long)]
     listen_port: u16,
 
-    #[arg(short, long)]
+    #[arg(long)]
     target_ip: String,
 
-    #[arg(short, long)]
+    #[arg(long)]
     target_port: u16,
 
-    #[arg(short, long)]
+    #[arg(long)]
     client_drop: f64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     server_drop: f64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     client_delay: f64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     server_delay: f64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     client_delay_time_min: u64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     client_delay_time_max: u64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     server_delay_time_min: u64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     server_delay_time_max: u64,
 
-    #[arg(short, long)]
+    #[arg(long)]
     log_port: u16,
 }
 
@@ -110,7 +110,7 @@ struct Ack {
     received: u64,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Metrics {
     packets_sent: u64,     // client send
     packets_received: u64, // server recv
@@ -154,11 +154,10 @@ async fn main() -> tokio::io::Result<()> {
     let client_sock =
         Arc::new(UdpSocket::bind(format!("{}:{}", args.listen_ip, args.listen_port)).await?);
     let server_sock = Arc::new(UdpSocket::bind("0.0.0.0:0").await?);
-    let server_addr = format!("{}:{}", args.target_ip, args.target_port)
-        .parse::<std::net::SocketAddr>()
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
-
-    let last_client = Arc::new(Mutex::new(None::<std::net::SocketAddr>));
+    let server_addr: std::net::SocketAddr = format!("{}:{}", args.target_ip, args.target_port)
+        .parse()
+        .expect("invalid server address");
+    let last_client = Arc::new(Mutex::new(None));
 
     // Client -> Server
     {
@@ -167,19 +166,18 @@ async fn main() -> tokio::io::Result<()> {
         let last_client1 = last_client.clone();
         let metrics1 = metrics.clone();
         let args1 = Arc::new(args.clone());
+        let mut rng = StdRng::seed_from_u64(42);
 
         tokio::spawn(async move {
             let mut buf = vec![0u8; 2048];
             loop {
                 if let Ok((n, client_addr)) = client_sock1.recv_from(&mut buf).await {
                     // remember client
-                    {
-                        let mut lock = last_client1.lock().await;
-                        *lock = Some(client_addr);
-                    }
+
+                    let mut lock = last_client1.lock().await;
+                    *lock = Some(client_addr);
 
                     // Drop
-                    let mut rng = StdRng::seed_from_u64(42);
                     if rng.random::<f64>() < (args1.client_drop) {
                         let _m = metrics1.lock().await;
                         // optional: count dropped packets in separate metric
@@ -210,13 +208,13 @@ async fn main() -> tokio::io::Result<()> {
         let server_sock2 = server_sock.clone();
         let last_client2 = last_client.clone();
         let args = Arc::new(args.clone());
+        let mut rng = StdRng::seed_from_u64(42);
 
         tokio::spawn(async move {
             let mut buf = vec![0u8; 2048];
             loop {
                 if let Ok((n, _server_from)) = server_sock2.recv_from(&mut buf).await {
                     // Drop
-                    let mut rng = StdRng::seed_from_u64(42);
                     if rng.random::<f64>() < (args.server_drop) {
                         continue;
                     }
@@ -250,7 +248,14 @@ async fn main() -> tokio::io::Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     loop {
-        terminal.draw(|f| draw_tui(f, &metrics))?;
+        let snapshot = {
+            let m = metrics.lock().await;
+            m.clone()
+        };
+
+        terminal.draw(|f| {
+            draw_tui(f, &snapshot);
+        })?;
 
         // Exit on q
         if event::poll(Duration::from_millis(100))? {
@@ -289,8 +294,7 @@ async fn handle_log(stream: TcpStream, metrics: Arc<Mutex<Metrics>>) {
     }
 }
 
-fn draw_tui(f: &mut Frame, metrics: &Arc<Mutex<Metrics>>) {
-    let m = metrics.blocking_lock();
+fn draw_tui(f: &mut Frame<'_>, m: &Metrics) {
     let values = [
         ("Sent", m.packets_sent.min(u64::from(u8::MAX)) as u8),
         ("Recv", m.packets_received.min(u64::from(u8::MAX)) as u8),

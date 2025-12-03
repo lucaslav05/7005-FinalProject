@@ -82,9 +82,9 @@ async fn main() -> tokio::io::Result<()> {
     let args = Args::parse();
 
     let server_addr = format!("{}:{}", args.target_ip, args.target_port); // <-- change
-    let bind_addr = "0.0.0.0:3000"; // client UDP port
+    let bind_addr = "0.0.0.0:0"; // client UDP port
 
-    let log_addr = "127.0.0.1:9100"; // UI log stream (client channel)
+    let log_addr = format!("{}:{}", args.target_ip, "9100"); // UI log stream (client channel)
 
     let udp = UdpSocket::bind(bind_addr).await?;
     udp.connect(server_addr).await?;

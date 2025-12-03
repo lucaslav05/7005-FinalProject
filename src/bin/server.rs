@@ -28,7 +28,7 @@ struct Args {
     listen_ip: String,
 
     #[arg(long)]
-    listen_port: String,
+    listen_port: u16,
 
     #[arg(long)]
     log_host: String,
