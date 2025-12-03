@@ -151,89 +151,64 @@ async fn main() -> tokio::io::Result<()> {
         }
     });
 
-    let client_sock =
-        Arc::new(UdpSocket::bind(format!("{}:{}", args.listen_ip, args.listen_port)).await?);
-    let server_sock = Arc::new(UdpSocket::bind("0.0.0.0:0").await?);
+    let sock = Arc::new(UdpSocket::bind(format!("{}:{}", args.listen_ip, args.listen_port)).await?);
     let server_addr: std::net::SocketAddr = format!("{}:{}", args.target_ip, args.target_port)
         .parse()
         .expect("invalid server address");
-    let last_client = Arc::new(Mutex::new(None));
-
-    // Client -> Server
-    {
-        let client_sock1 = client_sock.clone();
-        let server_sock1 = server_sock.clone();
-        let last_client1 = last_client.clone();
-        let metrics1 = metrics.clone();
-        let args1 = Arc::new(args.clone());
-        let mut rng = StdRng::seed_from_u64(42);
-
-        tokio::spawn(async move {
-            let mut buf = vec![0u8; 2048];
-            loop {
-                if let Ok((n, client_addr)) = client_sock1.recv_from(&mut buf).await {
-                    // remember client
-
-                    let mut lock = last_client1.lock().await;
-                    *lock = Some(client_addr);
-
-                    // Drop
-                    if rng.random::<f64>() < (args1.client_drop) {
-                        let _m = metrics1.lock().await;
-                        // optional: count dropped packets in separate metric
-                        continue;
-                    }
-
-                    // Delay
-                    if rng.random::<f64>() < (args1.client_delay) {
-                        let min = args1.client_delay_time_min;
-                        let max = args1.client_delay_time_max.max(min);
-                        let delay = if min == max {
-                            min
-                        } else {
-                            rng.random_range(min..=max)
-                        };
-                        sleep(Duration::from_millis(delay)).await;
-                    }
-
-                    let _ = server_sock1.send_to(&buf[..n], server_addr).await;
-                }
-            }
-        });
-    }
+    let last_client = Arc::new(Mutex::new(None::<std::net::SocketAddr>));
 
     {
-        // Server -> Client
-        let client_sock2 = client_sock.clone();
-        let server_sock2 = server_sock.clone();
-        let last_client2 = last_client.clone();
+        let sock = sock.clone();
+        let last_client = last_client.clone();
         let args = Arc::new(args.clone());
         let mut rng = StdRng::seed_from_u64(42);
 
         tokio::spawn(async move {
             let mut buf = vec![0u8; 2048];
+
             loop {
-                if let Ok((n, _server_from)) = server_sock2.recv_from(&mut buf).await {
-                    // Drop
-                    if rng.random::<f64>() < (args.server_drop) {
-                        continue;
+                if let Ok((n, addr)) = sock.recv_from(&mut buf).await {
+                    let mut lock = last_client.lock().await;
+                    if Some(addr) != *lock {
+                        // new client, remember it
+                        *lock = Some(addr);
                     }
 
-                    // Delay
-                    if rng.random::<f64>() < (args.server_delay) {
-                        let min = args.server_delay_time_min;
-                        let max = args.server_delay_time_max.max(min);
-                        let delay = if min == max {
-                            min
-                        } else {
-                            rng.random_range(min..=max)
-                        };
-                        sleep(Duration::from_millis(delay)).await;
-                    }
-
-                    // Forward to client
-                    if let Some(client_addr) = *last_client2.lock().await {
-                        let _ = client_sock2.send_to(&buf[..n], client_addr).await;
+                    if Some(addr) == *lock {
+                        // --- from client to server ---
+                        if rng.random::<f64>() < args.client_drop {
+                            // dropped
+                            continue;
+                        }
+                        if rng.random::<f64>() < args.client_delay {
+                            let min = args.client_delay_time_min;
+                            let max = args.client_delay_time_max.max(min);
+                            let delay = if min == max {
+                                min
+                            } else {
+                                rng.random_range(min..=max)
+                            };
+                            sleep(Duration::from_millis(delay)).await;
+                        }
+                        let _ = sock.send_to(&buf[..n], server_addr).await;
+                    } else {
+                        // --- from server to client ---
+                        if rng.random::<f64>() < args.server_drop {
+                            continue;
+                        }
+                        if rng.random::<f64>() < args.server_delay {
+                            let min = args.server_delay_time_min;
+                            let max = args.server_delay_time_max.max(min);
+                            let delay = if min == max {
+                                min
+                            } else {
+                                rng.random_range(min..=max)
+                            };
+                            sleep(Duration::from_millis(delay)).await;
+                        }
+                        if let Some(client_addr) = *lock {
+                            let _ = sock.send_to(&buf[..n], client_addr).await;
+                        }
                     }
                 }
             }
