@@ -23,14 +23,12 @@ client:
 
 
 server:
-				cargo build --bin server
 				./target/debug/server --listen-ip $(serverIP) \
 								--listen-port $(serverPORT) \
 								--log-host $(logHOST) \
 								--log-port $(logPORT)
 
 proxy:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -46,7 +44,6 @@ proxy:
 								--log-port $(logPORT)
 
 proxy-50-delay-client:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -62,7 +59,6 @@ proxy-50-delay-client:
 								--log-port $(logPORT)
 
 proxy-50-delay-server:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -78,7 +74,6 @@ proxy-50-delay-server:
 								--log-port $(logPORT)
 
 proxy-100-delay-server:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -94,7 +89,6 @@ proxy-100-delay-server:
 								--log-port $(logPORT)
 
 proxy-100-delay-client:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -110,7 +104,6 @@ proxy-100-delay-client:
 								--log-port $(logPORT)
 
 proxy-50-drop-client:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -126,7 +119,6 @@ proxy-50-drop-client:
 								--log-port $(logPORT)
 
 proxy-50-drop-server:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -142,7 +134,6 @@ proxy-50-drop-server:
 								--log-port $(logPORT)
 
 proxy-100-drop-server:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -158,7 +149,6 @@ proxy-100-drop-server:
 								--log-port $(logPORT)
 
 proxy-100-drop-client:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -174,7 +164,6 @@ proxy-100-drop-client:
 								--log-port $(logPORT)
 
 proxy-50-drop-both:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -190,7 +179,6 @@ proxy-50-drop-both:
 								--log-port $(logPORT)
 
 proxy-50-delay-both:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -206,7 +194,6 @@ proxy-50-delay-both:
 								--log-port $(logPORT)
 
 proxy-50-delay-drop-both:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
@@ -222,7 +209,6 @@ proxy-50-delay-drop-both:
 								--log-port $(logPORT)
 
 proxy-100-delay-drop-both:
-				cargo build --bin proxy
 				./target/debug/proxy --listen-ip $(proxyIP) \
                 --listen-port $(proxyPORT) \
                 --target-ip $(serverIP) \
